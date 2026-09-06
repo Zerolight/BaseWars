@@ -1,0 +1,10 @@
+"basewars"
+{
+	"base"			"sandbox"
+	"title"			"BaseWars"
+	"author"		"Original: Rickdark | Developer: LlamaLords"
+	"version"		"1.9"
+	"website"		"www.website.net"
+	"menusystem"	"1"
+	"maps"			"^basewars_"
+}

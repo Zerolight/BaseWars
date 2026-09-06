@@ -1,0 +1,13 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "LmaoLlama/props/bigbomb_barrel"
+	"$bumpmap" "LmaoLlama/props/bigbomb_barrel_bump"
+	"$envmap" env_cubemap
+	"$envmaptint" "[0.01 0.01 0.01]"
+	"$phong" 1
+	"$phongexponent" 20
+	"$phongboost" "0.2"
+	"$phongfresnelranges" "[0.5 0.75 1]
+	"$surfaceprop" "metal"
+	"$model" 1
+}

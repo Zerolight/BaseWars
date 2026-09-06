@@ -1,0 +1,15 @@
+{
+	"title": "BaseWars Content",
+	"type": "servercontent",
+	"tags": ["roleplay", "build"],
+	"ignore": [
+		"addon.json",
+		"materials/gui/*",
+		"materials/gui/silkicons/*",
+		"*.psd",
+		"*.pdn",
+		"*.vcproj",
+		"*.svn*",
+		"*.git*"
+	]
+}

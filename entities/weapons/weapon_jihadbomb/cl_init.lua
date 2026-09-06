@@ -1,0 +1,13 @@
+include('shared.lua')
+
+SWEP.PrintName			= "Jihad Bomb"
+SWEP.Slot				= 3
+SWEP.SlotPos			= 1
+SWEP.DrawAmmo			= false
+SWEP.DrawCrosshair		= false
+
+function SWEP:WorldBoom()
+
+	surface.EmitSound( "siege/big_explosion.wav" )
+
+end

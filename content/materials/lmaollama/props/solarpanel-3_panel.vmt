@@ -1,0 +1,9 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "LmaoLlama/props/solarpanel-3_panel"
+	"$bumpmap" "LmaoLlama/props/solarpanel-3_panel_bump"
+	"$envmap" env_cubemap
+	"$normalmapalphaenvmapmask" 1
+	"$surfaceprop" "metal"
+	"$model" 1
+}

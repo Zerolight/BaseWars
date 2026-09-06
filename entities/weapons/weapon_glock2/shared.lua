@@ -1,0 +1,69 @@
+SWEP.Base 				= "weapon_mad_base"
+
+SWEP.ViewModelFOV			= 70
+SWEP.ViewModelFlip		= true
+SWEP.ViewModel			= "models/weapons/v_pist_glock18.mdl"
+SWEP.WorldModel			= "models/weapons/w_pist_glock18.mdl"
+
+SWEP.Spawnable			= true
+SWEP.AdminSpawnable		= false
+
+SWEP.Primary.Sound 		= Sound("Weapon_Glock.Single")
+SWEP.Primary.Recoil		= 1.5
+SWEP.Primary.Damage		= 12.5
+SWEP.Primary.NumShots		= 1
+SWEP.Primary.Cone			= 0.014
+
+function SWEP:Upgrade(bool)
+	self:SetNWBool("upgraded",bool)
+	if bool then
+		self.Primary.Cone = 0.007
+	else
+		self.Primary.Cone = 0.014
+	end
+end
+
+SWEP.Primary.Delay 		= 0.1
+
+SWEP.Primary.ClipSize		= 19
+SWEP.Primary.DefaultClip	= 19
+SWEP.Primary.Automatic		= false
+SWEP.Primary.Ammo			= "Battery"
+
+SWEP.Secondary.ClipSize		= -1
+SWEP.Secondary.DefaultClip	= -1
+SWEP.Secondary.Automatic	= false
+SWEP.Secondary.Ammo		= "none"
+
+SWEP.ShellEffect			= "effect_mad_shell_pistol"
+SWEP.ShellDelay			= 0
+
+SWEP.Pistol				= true
+SWEP.Rifle				= false
+SWEP.Shotgun			= false
+SWEP.Sniper				= false
+
+SWEP.IronSightsPos 		= Vector (4.3442, 0, 2.7671)
+SWEP.IronSightsAng 		= Vector (0.726, 0.0313, 0)
+
+SWEP.Burst				= true
+SWEP.BurstShots			= 3
+SWEP.BurstDelay			= 0.025
+SWEP.BurstCounter			= 0
+SWEP.BurstTimer			= 0
+
+SWEP.Type				= 3
+SWEP.Mode				= true
+
+SWEP.data 				= {}
+SWEP.data.NormalMsg		= "Switched to semi-automatic."
+SWEP.data.ModeMsg			= "Switched to burst fire mode."
+SWEP.data.Delay			= 0.5
+SWEP.data.Cone			= 2
+SWEP.data.Damage			= 1
+SWEP.data.Recoil			= 1
+
+function SWEP:Precache()
+
+    	util.PrecacheSound("weapons/glock/glock18-1.wav")
+end

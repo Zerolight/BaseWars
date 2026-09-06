@@ -1,0 +1,338 @@
+include('shared.lua')
+
+SWEP.PrintName			= "Mad Cows Weapon Base"
+SWEP.Slot				= 0
+SWEP.SlotPos			= 1
+SWEP.DrawAmmo			= true
+SWEP.DrawCrosshair		= false
+SWEP.DrawWeaponInfoBox		= true
+SWEP.BounceWeaponIcon   	= false
+SWEP.SwayScale			= 1.0
+SWEP.BobScale			= 1.0
+
+SWEP.RenderGroup 			= RENDERGROUP_OPAQUE
+
+if (file.Exists( "materials/weapons/swep.vmt", "GAME" )) then
+	SWEP.WepSelectIcon	= surface.GetTextureID("weapons/swep")
+end
+
+if (file.Exists( "materials/gui/speech_lid.vmt", "GAME" )) then
+	SWEP.SpeechBubbleLid	= surface.GetTextureID("gui/speech_lid")
+end
+
+language.Add("airboatgun_ammo", "5.56MM Ammo")
+language.Add("gravity_ammo", "4.6MM Ammo")
+language.Add("alyxgun_ammo", "5.7MM Ammo")
+language.Add("battery_ammo", "9MM Ammo")
+language.Add("striderminigun_ammo", "7.62MM Ammo")
+language.Add("sniperpenetratedround_ammo", ".45 Ammo")
+language.Add("combinecannon_ammo", ".50 Ammo")
+language.Add("thumper_ammo", "Explosive Ammo")
+
+function SWEP:SecondDrawHUD()
+end
+
+cl_crosshair_r 		= CreateClientConVar("mad_crosshair_r", 255, true, false)
+cl_crosshair_g 		= CreateClientConVar("mad_crosshair_g", 255, true, false)
+cl_crosshair_b 		= CreateClientConVar("mad_crosshair_b", 255, true, false)
+cl_crosshair_a 		= CreateClientConVar("mad_crosshair_a", 200, true, false)
+cl_crosshair_l 		= CreateClientConVar("mad_crosshair_l", 30, true, false)
+cl_crosshair_t 		= CreateClientConVar("mad_crosshair_t", 1, true, false)
+
+function SWEP:DrawHUD()
+
+	self:SecondDrawHUD()
+	self:DrawFuelHUD()
+
+	if (self:GetDTBool(1)) or (cl_crosshair_t:GetBool() == false) or (LocalPlayer():InVehicle()) or (CfgVars["WeaponCrosshairs"] == 0) then return end
+
+	local hitpos = util.TraceLine ({
+		start = LocalPlayer():GetShootPos(),
+		endpos = LocalPlayer():GetShootPos() + LocalPlayer():GetAimVector() * 4096,
+		filter = LocalPlayer(),
+		mask = MASK_SHOT
+	}).HitPos
+
+	local screenpos = hitpos:ToScreen()
+
+	local x = screenpos.x
+	local y = screenpos.y
+
+	if self.Primary.Cone < 0.005 then
+		self.Primary.Cone = 0.005
+	end
+
+	local gap = ((self.Primary.Cone * 275) + (((self.Primary.Cone * 275) * (ScrH() / 720))) * (1 / self:CrosshairAccuracy())) * 0.75
+
+	gap = math.Clamp(gap, 0, (ScrH() / 2) - 100)
+	local length = cl_crosshair_l:GetInt()
+
+	self:DrawCrosshairHUD(x - gap - length, y - 1, length, 3)
+	self:DrawCrosshairHUD(x + gap + 1, y - 1, length, 3)
+ 	self:DrawCrosshairHUD(x - 1, y - gap - length, 3, length)
+ 	self:DrawCrosshairHUD(x - 1, y + gap + 1, 3, length)
+end
+
+function SWEP:DrawCrosshairHUD(x, y, width, height)
+
+	surface.SetDrawColor(0, 0, 0, cl_crosshair_a:GetInt() / 2)
+	surface.DrawRect(x, y, width, height)
+
+	surface.SetDrawColor(cl_crosshair_r:GetInt(), cl_crosshair_g:GetInt(), cl_crosshair_b:GetInt(), cl_crosshair_a:GetInt())
+	surface.DrawRect(x + 1, y + 1, width - 2, height - 2)
+end
+
+function SWEP:DrawFuelHUD()
+
+	if (self:GetOwner():GetNWInt("Fuel") > 0) then
+
+		local x, y, w, h, space, t, r, n, txt, poly, a
+
+		if not self.BaseClass.WrenchData then
+			t = {}
+
+			t.Poly = {
+					{x = 0,	y = 0,	u = 0,	v = 0},
+					{x = 0,	y = 0,	u = 0,	v = 0},
+					{x = 0,	y = 0,	u = 0,	v = 0},
+					{x = 0,	y = 0,	u = 0,	v = 0},
+				}
+
+			w = ScreenScale(36)
+			h = ScreenScale(36)
+
+			space = ScreenScale(20)
+
+			x = ScrW() - w - 10
+			y = ScrH() / 2.0 - h / 2
+
+			t.Origin = {}
+
+			t.Origin.x = x
+			t.Origin.y = y
+			t.Origin.w = w
+			t.Origin.h = h
+
+			t.Poly[1].x = x
+
+			t.Poly[2].x = x + w
+			t.Poly[2].u = 1
+
+			t.Poly[3].x = x + w
+			t.Poly[3].y = y + h
+			t.Poly[3].u = 1
+			t.Poly[3].v = 1
+
+			t.Poly[4].x = x
+			t.Poly[4].y = y + h
+			t.Poly[4].v = 1
+
+			t.Percent = 1
+			t.Color = Color(255, 255, 255, 255)
+			t.Shadow = Color(000, 000, 000, 255)
+			t.Texture = surface.GetTextureID("vgui/entities/ent_mad_fuel_mini")
+
+			self.BaseClass.FuelData = t
+		end
+
+		x = self.BaseClass.FuelData.Origin.x
+		y = self.BaseClass.FuelData.Origin.y
+		w = self.BaseClass.FuelData.Origin.w
+		h = self.BaseClass.FuelData.Origin.h
+		poly = self.BaseClass.FuelData.Poly
+
+		self.BaseClass.FuelData.Percent = self:GetOwner():GetNWInt("Fuel")
+
+		a = self.BaseClass.FuelData.Percent / 100
+
+		poly[1].y = y + h * (1 - a)
+		poly[1].v = 1 - a
+
+		poly[2].y = y + h * (1 - a)
+		poly[2].v = 1 - a
+
+		surface.SetTexture(self.BaseClass.FuelData.Texture)
+		surface.SetDrawColor(000, 000, 000, 255)
+		surface.DrawTexturedRect(x, y, w, h)
+
+		surface.SetDrawColor(255, 255, 255, 255)
+		surface.DrawPoly(poly)
+
+		surface.SetFont("TargetIDSmall")
+
+		txt = math.Round(self.BaseClass.FuelData.Percent) .. "%"
+
+		r, n = surface.GetTextSize(txt)
+
+		draw.SimpleTextOutlined(txt, "TargetIDSmall", poly[2].x - w * 0.5, y - n, self.BaseClass.FuelData.Color, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, self.BaseClass.FuelData.Shadow)
+	end
+end
+
+function SWEP:DrawWeaponSelection(x, y, wide, tall, alpha)
+
+	surface.SetDrawColor(255, 255, 255, alpha)
+	surface.SetTexture(self.WepSelectIcon)
+
+	local fsin = 0
+
+	if (self.BounceWeaponIcon == true) then
+		fsin = math.sin(CurTime() * 10) * 5
+	end
+
+	y = y + 10
+	x = x + 10
+	wide = wide - 20
+
+	surface.DrawTexturedRect(x + (fsin), y - (fsin), wide - fsin * 2, (wide / 2) + (fsin))
+
+	self:PrintWeaponInfo(x + wide + 20, y + tall * 0.95, alpha)
+end
+
+function SWEP:PrintWeaponInfo(x, y, alpha)
+
+	if (self.DrawWeaponInfoBox == false) then return end
+
+	if (self.InfoMarkup == nil) then
+		local str
+		local title_color = "<color = 130, 0, 0, 255>"
+		local text_color = "<color = 255, 255, 255, 200>"
+
+		str = "<font=HudSelectionText>"
+		if (self.Author ~= "") then str = str .. title_color .. "Author:</color>\t" .. text_color .. self.Author .. "</color>\n" end
+		if (self.Contact ~= "") then str = str .. title_color .. "Contact:</color>\t" .. text_color .. self.Contact .. "</color>\n\n" end
+		if (self.Purpose ~= "") then str = str .. title_color .. "Purpose:</color>\n" .. text_color .. self.Purpose .. "</color>\n\n" end
+		if (self.Instructions~= "") then str = str .. title_color .. "Instructions:</color>\n" .. text_color .. self.Instructions .. "</color>\n" end
+		str = str .. "</font>"
+
+		self.InfoMarkup = markup.Parse(str, 250)
+	end
+
+	alpha = 180
+
+	surface.SetDrawColor(0, 0, 0, alpha)
+	surface.SetTexture(self.SpeechBubbleLid)
+
+	surface.DrawTexturedRect(x, y - 69.5, 128, 64)
+	draw.RoundedBox(8, x - 5, y - 6, 260, self.InfoMarkup:GetHeight() + 18, Color(0, 0, 0, alpha))
+
+	self.InfoMarkup:Draw(x + 5, y + 5, nil, nil, alpha)
+end
+
+local IRONSIGHT_TIME = 0.2
+
+function SWEP:GetViewModelPosition(pos, ang)
+
+	local bIron = self:GetDTBool(1)
+
+	local DashDelta = 0
+
+	if (self:GetOwner():KeyDown(IN_SPEED) or self:GetDTBool(0)) then
+		if (not self.DashStartTime) then
+			self.DashStartTime = CurTime()
+		end
+
+		DashDelta = math.Clamp(((CurTime() - self.DashStartTime) / 0.1) ^ 1.2, 0, 1)
+	else
+		if (self.DashStartTime) then
+			self.DashEndTime = CurTime()
+		end
+
+		if (self.DashEndTime) then
+			DashDelta = math.Clamp(((CurTime() - self.DashEndTime) / 0.1) ^ 1.2, 0, 1)
+			DashDelta = 1 - DashDelta
+			if (DashDelta == 0) then self.DashEndTime = nil end
+		end
+
+		self.DashStartTime = nil
+	end
+
+	if (DashDelta) then
+		local Down = ang:Up() * -1
+		local Right = ang:Right()
+		local Forward = ang:Forward()
+
+		local bUseVector = false
+
+		if(not self.RunArmAngle.pitch) then
+			bUseVector = true
+		end
+
+		if (bUseVector == true) then
+			ang:RotateAroundAxis(ang:Right(), self.RunArmAngle.x * DashDelta)
+			ang:RotateAroundAxis(ang:Up(), self.RunArmAngle.y * DashDelta)
+			ang:RotateAroundAxis(ang:Forward(), self.RunArmAngle.z * DashDelta)
+
+			pos = pos + self.RunArmOffset.x * ang:Right() * DashDelta
+			pos = pos + self.RunArmOffset.y * ang:Forward() * DashDelta
+			pos = pos + self.RunArmOffset.z * ang:Up() * DashDelta
+		else
+			ang:RotateAroundAxis(Right, elf.RunArmAngle.pitch * DashDelta)
+			ang:RotateAroundAxis(Down, self.RunArmAngle.yaw * DashDelta)
+			ang:RotateAroundAxis(Forward, self.RunArmAngle.roll * DashDelta)
+
+			pos = pos + (Down * self.RunArmOffset.x + Forward * self.RunArmOffset.y + Right * self.RunArmOffset.z) * DashDelta
+		end
+
+		if (self.DashEndTime) then
+			return pos, ang
+		end
+	end
+
+	if (bIron ~= self.bLastIron) then
+		self.bLastIron = bIron
+		self.fIronTime = CurTime()
+
+		if (bIron) then
+			self.SwayScale 	= 0.3
+			self.BobScale 	= 0.1
+		else
+			self.SwayScale 	= 1.0
+			self.BobScale 	= 1.0
+		end
+
+	end
+
+	local fIronTime = self.fIronTime or 0
+
+	if (not bIron and fIronTime < CurTime() - IRONSIGHT_TIME) then
+		return pos, ang
+	end
+
+	local Mul = 1.0
+
+	if (fIronTime > CurTime() - IRONSIGHT_TIME) then
+		Mul = math.Clamp((CurTime() - fIronTime) / IRONSIGHT_TIME, 0, 1)
+
+		if (not bIron) then Mul = 1 - Mul end
+	end
+
+	if (self.IronSightsAng) then
+		ang = ang * 1
+		ang:RotateAroundAxis(ang:Right(), 	self.IronSightsAng.x * Mul)
+		ang:RotateAroundAxis(ang:Up(), 	self.IronSightsAng.y * Mul)
+		ang:RotateAroundAxis(ang:Forward(), self.IronSightsAng.z * Mul)
+	end
+
+	local Right 	= ang:Right()
+	local Up 		= ang:Up()
+	local Forward 	= ang:Forward()
+
+	pos = pos + self.IronSightsPos.x * Right * Mul
+	pos = pos + self.IronSightsPos.y * Forward * Mul
+	pos = pos + self.IronSightsPos.z * Up * Mul
+
+	return pos, ang
+end
+
+function SWEP:AdjustMouseSensitivity()
+
+	return nil
+end
+
+function SWEP:GetTracerOrigin()
+
+	if (self:GetDTBool(1)) then
+		local pos = self:GetOwner():EyePos() + self:GetOwner():EyeAngles():Up() * -4
+		return pos
+	end
+end

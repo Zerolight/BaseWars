@@ -1,0 +1,15 @@
+"UnlitGeneric"
+{
+	"$basetexture" "LmaoLlama/props/c4_flash"
+	"$surfaceprop" "glass"
+	"$model" 1
+Proxies
+{
+	TextureScroll
+	{
+		texturescrollvar $basetextureTransform
+		texturescrollrate 6.5
+		texturescrollangle 180.00
+	}
+}
+}
